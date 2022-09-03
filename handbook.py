@@ -1,13 +1,13 @@
 """
-Inside conditions.json, you will see a subset of UNSW courses mapped to their 
+Inside conditions.json, you will see a subset of UNSW courses mapped to their
 corresponding text conditions. We have slightly modified the text conditions
 to make them simpler compared to their original versions.
 
-Your task is to complete the is_unlocked function which helps students determine 
-if their course can be taken or not. 
+Your task is to complete the is_unlocked function which helps students determine
+if their course can be taken or not.
 
 We will run our hidden tests on your submission and look at your success rate.
-We will only test for courses inside conditions.json. We will also look over the 
+We will only test for courses inside conditions.json. We will also look over the
 code by eye.
 
 NOTE: We do not expect you to come up with a perfect solution. We are more interested
@@ -30,12 +30,11 @@ course_pattern = r'[a-zA-Z]{4}\d{4}'
 # NOTE: DO NOT EDIT conditions.json
 with open("./conditions.json") as f:
     CONDITIONS = json.load(f)
-    print(CONDITIONS['COMP1521'])
     f.close()
 
 
 def is_unlocked(courses_list, target_course):
-    """Given a list of course codes a student has taken, return true if the target_course 
+    """Given a list of course codes a student has taken, return true if the target_course
     can be unlocked by them.
 
     You do not have to do any error checking on the inputs and can assume that
@@ -53,18 +52,13 @@ def is_unlocked(courses_list, target_course):
     elif CONDITIONS[target_course] and not courses_list:
         return False
     else:
-        expr = CONDITIONS[target_course]
-
         # Normalise requirements
+        expr = CONDITIONS[target_course]
         req = " ".join(expr.lower().split())
 
         # Remove pre-requisites tag
         match_prereq = r'pre.*: '
         req = re.sub(match_prereq, '', req, re.I)
-
-        m = re.findall(course_pattern, req, re.IGNORECASE)
-        if m:
-            print(m)
 
         expression = []
         last_start = 0
@@ -150,19 +144,17 @@ def parse(expression):
     for el in expression:
         m = re.match(course_pattern, el, re.IGNORECASE)
 
-        if el in operators:
-            if el == ")":
-                last_op = None
-                while last_op != "(":
-                    last_op = composite_stack.pop()
-
-                    if last_op != "(":
-                        course_queue.append(last_op)
-            else:
-                # Check precedence of operators
-                if composite_stack and dict_precedence[el] < dict_precedence[composite_stack[-1]]:
-                    course_queue.append(composite_stack.pop())
-                composite_stack.append(el)
+        if el in operators and el == ")":
+            last_op = None
+            while last_op != "(":
+                last_op = composite_stack.pop()
+                if last_op != "(":
+                    course_queue.append(last_op)
+        elif el in operators:
+            # Check precedence of operators
+            if composite_stack and dict_precedence[el] < dict_precedence[composite_stack[-1]]:
+                course_queue.append(composite_stack.pop())
+            composite_stack.append(el)
         elif m:
             course_queue.append(m.group(0))
         else:
@@ -190,7 +182,6 @@ def parse_infix(expression_queue, courses_list):
             course_stack.append(RequirementNode(
                 requirement, ' '.join(condition), courses_list))
         elif match_course:
-            print(expr, hasCourse(expr, courses_list))
             course_stack.append(LeafNode(hasCourse(expr, courses_list)))
         else:
             course_stack.append(LeafNode(expr))
